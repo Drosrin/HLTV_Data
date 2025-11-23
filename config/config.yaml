@@ -1,5 +1,7 @@
 scraper:
   chrome_driver_path: "C:/Program Files/Google/Chrome/Application/chrome.exe"
+  headless: false
+  page_load_strategy: eager
 
 player:
   

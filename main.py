@@ -1,6 +1,10 @@
 import sys
 import argparse
 import importlib
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 
 def main():
     parser = argparse.ArgumentParser(description="Dynamically run a function from a specified module.")
