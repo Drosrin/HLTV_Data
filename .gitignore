@@ -1,2 +1,4 @@
 database
 .vscode
+logs
+src/__pycache__
