@@ -1,0 +1,54 @@
+---
+search: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+  div.contentCol > div.search > table:nth-child(4) > tbody > tr:nth-child(2) >
+  td > a
+player_basic_stats:
+  rt: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-middle >
+      div.player-summary-stat-box-rating-wrapper.average >
+      div.player-summary-stat-box-rating-data-text
+  t_side_rt: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-middle >
+      div.player-summary-stat-box-side-rating.t-rating > div
+  ct_side_rt: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-middle >
+      div.player-summary-stat-box-side-rating.ct-rating > div
+  round_swing: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-bottom > div:nth-child(1) >
+      div.player-summary-stat-box-data
+  dpr: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-bottom > div:nth-child(2) >
+      div.player-summary-stat-box-data
+  kast: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-bottom > div:nth-child(3) >
+      div.player-summary-stat-box-data
+  multi_kill: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-bottom > div:nth-child(4) >
+      div.player-summary-stat-box-data
+  adr: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-bottom > div:nth-child(5) >
+      div.player-summary-stat-box-data
+  kpr: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+      div.contentCol > div.stats-section.stats-player.stats-player-overview >
+      div.player-summary-stat-box.compact > div.player-summary-stat-box-right >
+      div.player-summary-stat-box-right-bottom > div:nth-child(6) >
+      div.player-summary-stat-box-data
+match_table: body > div.bgPadding > div.widthControl > div:nth-child(2) >
+  div.contentCol > div.stats-section.stats-player.stats-player-matches > table >
+  tbody

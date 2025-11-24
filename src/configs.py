@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import yaml
 
 CONFIG_FILE = "config/config.yaml"
+SELECTOR_FILE = "config/HLTV_website_selector_path.yaml"
 
 @dataclass
 class ScraperConfig:
@@ -13,6 +14,16 @@ class ScraperConfig:
     
     BASE_URL:str = 'https://www.hltv.org'
     LOG_FILE:str = 'logs/' + datetime.now().strftime("%Y-%m-%d")
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+@dataclass
+class WebsiteSelectorPaths:
+    search: str
+    player_basic_stats: dict[str, str]
+    match_table: str
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
@@ -29,7 +40,7 @@ class MatchConfig:
 
 class Filter:
     map_names = Literal["All", "de_ancient", "de_dust2", "de_inferno", "de_mirage", "de_nuke", "de_overpass", "de_train", "de_anubis", "de_vertigo", "de_cache", "de_cobblestone"]
-    quick_time_filter:Literal["All", "Last Month", "Last 3 Months", "Last 6 Months", "Last 12 Months"]
+    quick_time_filter:Literal["All", "Last Month", "Last 3 Months", "Last 6 Months", "Last 12 Months"] | None
     start_date:datetime
     end_date:datetime
     match_type:str # Majors, BigEvents, Lan, Online
@@ -38,7 +49,7 @@ class Filter:
     ranking:str    # Top5, Top10, Top20, Top30, Top50
 
     def __init__(self, 
-                 quick_time_filter:Literal["All", "Last Month", "Last 3 Months", "Last 6 Months", "Last 12 Months"] = "All", 
+                 quick_time_filter:Literal["All", "Last Month", "Last 3 Months", "Last 6 Months", "Last 12 Months"] | None = "All", 
                  start_date:datetime = datetime.min, 
                  end_date:datetime = datetime.max, 
                  match_type:Literal["All", "Majors", "BigEvents", "Lan", "Online"] = "All", 
@@ -83,6 +94,8 @@ class Filter:
                 case "Last 12 Months":
                     self.start_date = datetime.now() - timedelta(days=365)
                     self.end_date = datetime.now()
+                case _:
+                    raise ValueError("quick_time_filter is not valid")
         else:
             self.start_date = start_date
             self.end_date = end_date
@@ -122,3 +135,8 @@ def get_match_config(config_file = CONFIG_FILE) -> MatchConfig:
     with open(config_file, 'r') as file:
         config = yaml.safe_load(file)
         return MatchConfig(**config['match'])
+    
+def get_selector_paths(config_file = SELECTOR_FILE) -> WebsiteSelectorPaths:
+    with open(config_file, 'r') as file:
+        config = yaml.safe_load(file)
+        return WebsiteSelectorPaths(**config)

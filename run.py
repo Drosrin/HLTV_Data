@@ -1,11 +1,6 @@
 import sys
 import argparse
 import importlib
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-
 def main():
     parser = argparse.ArgumentParser(description="Dynamically run a function from a specified module.")
     parser.add_argument('--module', type=str, required=True,
@@ -18,6 +13,7 @@ def main():
         module = importlib.import_module(args.module)
     except ModuleNotFoundError as e:
         print(f"Error: Module '{args.module}' not found.", file=sys.stderr)
+        print(f"This is the error message: {e}")
         sys.exit(1)
 
     if not hasattr(module, args.entry):

@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 import undetected_chromedriver as uc
 from selenium.webdriver.chrome.options import Options
 
-from src.configs import get_scraper_config, Filter # This is in ./src! Not ./config !
+from src.configs import get_scraper_config, get_selector_paths, Filter # This is in ./src! Not ./config !
 from src.logger import get_logger
 from src.views.visualize import visualize_player_stats
 from src.utils.exponential_backoff import exponential_backoff
@@ -57,6 +57,7 @@ class HLTV_Player_Stat_Scraper:
         self._driver = self._get_driver()
         self.player_name = player_name
         self.player_id = player_id
+        self._selector_paths = get_selector_paths()
 
         self.logger.info("HLTV_Player_Stat_Scraper initialized")
 
@@ -101,8 +102,7 @@ class HLTV_Player_Stat_Scraper:
         player_name = player_name if self.player_name is None else self.player_name
         search_page = f"{self._config.BASE_URL}/search?query={player_name}"
         self._driver.get(search_page) # It seems that this page is not protected by Cloudflare?
-        search_selector_path = 'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.search > table:nth-child(4) > tbody > tr:nth-child(2) > td > a'
-        player_url = self._driver.find_element(By.CSS_SELECTOR, search_selector_path).get_attribute('href')
+        player_url = self._driver.find_element(By.CSS_SELECTOR, self._selector_paths.search).get_attribute('href')
         if player_url is None:
             self.logger.error(f"Player {player_name} not found")
             return None
@@ -161,18 +161,7 @@ class HLTV_Player_Stat_Scraper:
         src_url = f"{self._config.BASE_URL}/stats/players/{self.player_id}/{self.player_name}?{str(stats_filter)}"
         self._driver.get(src_url)
         self.logger.info(f"Getting basic stats for player: {self.player_name}")
-        selector_paths = {
-            'rt':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-middle > div.player-summary-stat-box-rating-wrapper.average > div.player-summary-stat-box-rating-data-text',
-            't_side_rt':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-middle > div.player-summary-stat-box-side-rating.t-rating > div',
-            'ct_side_rt':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-middle > div.player-summary-stat-box-side-rating.ct-rating > div',
-            'round_swing':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-bottom > div:nth-child(1) > div.player-summary-stat-box-data',
-            'dpr':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-bottom > div:nth-child(2) > div.player-summary-stat-box-data.traditionalData',
-            'kast':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-bottom > div:nth-child(3) > div.player-summary-stat-box-data.traditionalData',
-            'multi_kill':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-bottom > div:nth-child(4) > div.player-summary-stat-box-data.traditionalData',
-            'adr':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-bottom > div:nth-child(5) > div.player-summary-stat-box-data.traditionalData',
-            'kpr':'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-overview > div.player-summary-stat-box.compact > div.player-summary-stat-box-right > div.player-summary-stat-box-right-bottom > div:nth-child(6) > div.player-summary-stat-box-data.traditionalData',
-        }
-        stats = {key:self._driver.find_element(By.CSS_SELECTOR, value).text.split("\n")[0] for key, value in selector_paths.items()}
+        stats = {key:self._driver.find_element(By.CSS_SELECTOR, value).text.split("\n")[0] for key, value in self._selector_paths.player_basic_stats.items()}
         self.logger.info(f"Basic stats of {self.player_name} has been retrieved: {visualize_player_stats(stats)}")
         return stats
 
@@ -195,7 +184,6 @@ class HLTV_Player_Stat_Scraper:
         list[str]
             List of URLs for individual match pages
         """
-        match_table_selector_path = 'body > div.bgPadding > div.widthControl > div:nth-child(2) > div.contentCol > div.stats-section.stats-player.stats-player-matches > table > tbody'
         offset = 0
         matches = []
         self.logger.info(f"Getting matches of {self.player_name}")
@@ -206,12 +194,12 @@ class HLTV_Player_Stat_Scraper:
             else:
                 src_url = f"{self._config.BASE_URL}/stats/players/matches/{self.player_id}/{self.player_name}?offset={offset}&{str(match_filter)}"
             self._driver.get(src_url)
-            self._driver.find_element(By.CSS_SELECTOR, match_table_selector_path)
+            self._driver.find_element(By.CSS_SELECTOR, self._selector_paths.match_table)
             # And by now we ensure that the page is loaded
             this_page_matches = []
             for i in range(1, 101): # HLTV match page is ranging from 1 to 100
                 try:
-                    match_url = self._driver.find_element(By.CSS_SELECTOR, f"{match_table_selector_path} > tr:nth-child({i}) > td:nth-child(1) > a").get_attribute('href')
+                    match_url = self._driver.find_element(By.CSS_SELECTOR, f"{self._selector_paths.match_table} > tr:nth-child({i}) > td:nth-child(1) > a").get_attribute('href')
                     this_page_matches.append(match_url)
                 except selenium.common.exceptions.NoSuchElementException:
                     break
@@ -252,12 +240,12 @@ def main():
     stat = scraper.get_basic_stats(
         stats_filter = Filter(
             quick_time_filter='Last Month',
-            ranking='Top5'            
+            ranking='Top5'
         )
     )
     matches = scraper.get_match_urls(
         match_filter = Filter(
-            ranking='Top5'        
+            ranking='Top5'
         )
     )
     # These matches could be further passed to `match.py` to get more details.
